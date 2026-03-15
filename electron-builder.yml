@@ -1,0 +1,19 @@
+appId: com.junjijii.ai-news-digest
+productName: AI News Digest
+directories:
+  output: release
+mac:
+  target:
+    - dmg
+    - zip
+  category: public.app-category.news
+  icon: build/icon.icns
+dmg:
+  title: AI News Digest
+files:
+  - dist/**/*
+  - dist-electron/**/*
+  - "!node_modules/**/*"
+  - node_modules/@anthropic-ai/**/*
+  - node_modules/electron-store/**/*
+  - node_modules/node-cron/**/*
