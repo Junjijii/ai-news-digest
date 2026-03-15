@@ -15,38 +15,44 @@
 - **設定保存**: electron-store
 
 ## 現在のバージョン / 状態
-v1.0.0 開発中 - 基盤実装完了、Codexによるビルド確認・修正待ち
+v1.0.0 開発中 - Issue #1 #2 #3 対応完了、Claude Codeレビュー待ち
 
 ## 協業ステータス
 - lead: Claude Code
 - executor: Codex
-- phase: implementation
-- handoff_ready: true
-- next_owner: Codex
+- phase: review
+- handoff_ready: false
+- next_owner: Claude Code
 - final_owner: Claude Code
 - updated_at: 2026-03-15
 
 ## 直近の変更（最新を上に追記）
 | 日付 | 変更内容 | 担当 |
 |------|---------|------|
+| 2026-03-15 | Issue #1 #2 #3 対応。Vite/Electron 起動経路修正、`node-cron` 型追加、スピナー追加、カード hover と入力 focus 改善、`npm run build` 成功確認 | Codex |
 | 2026-03-15 | 全ファイル初期実装（Electron main/preload, React UI, X API, Summarizer, Scheduler, Settings） | Claude Code |
 
 ## 次にやること
-- [ ] `npm run electron:dev` でビルド・起動確認（Issue #1）
-- [ ] TypeScript/ビルドエラーの修正（Issue #2）
-- [ ] CSSアニメーション（スピナー）追加（Issue #3）
+- [x] `npm run electron:dev` でビルド・起動確認（Issue #1）
+- [x] TypeScript/ビルドエラーの修正と Electron main の ESM/CJS 起動エラー解消
+- [x] CSSスピナーアニメーション追加（Issue #2）
+- [x] NewsCard hover / 設定 input focus 改善（Issue #3）
 - [ ] ダークモード hover/transition 改善（Issue #4）
 
 ## 現在の問題
-なし（初期実装直後のため、ビルド時に問題が出る可能性あり）
+なし
 
 ## 引き継ぎメモ
-- from: Claude Code
-- to: Codex
+- from: Codex
+- to: Claude Code
 - branch: main
-- commit: 初回コミット
-- summary: Electron + React + Vite の全ファイルを実装済み。npm install 済み。`npm run electron:dev` で起動確認→エラーがあれば修正が必要。
-- tests: テストなし（UIアプリのため手動確認）
+- commit: この更新を含む最新の main を参照
+- summary: `npm run electron:dev` の `::1` bind 問題を回避するため Vite/Wait-on/Electron の dev URL を `127.0.0.1` に統一。`node-cron` 型宣言を追加し、Electron main で `electron-store` / `@anthropic-ai/sdk` をバンドル対象に変更して ESM の `require()` エラーを解消。Issue #2 のスピナーと Issue #3 の hover/focus スタイルも追加済み。
+- tests:
+  - `npx tsc --noEmit` ✅
+  - `npx vite build` ✅
+  - `npm run build` ✅（DMG/zip 生成）
+  - `npm run electron:dev` ✅（Electron process 起動確認）
 
 ## ファイル構成
 ```

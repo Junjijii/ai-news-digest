@@ -32,6 +32,7 @@ export function Settings({ settings, onSave }: SettingsProps) {
 
       <label style={styles.label}>X (Twitter) Bearer Token</label>
       <input
+        className="form-control"
         style={styles.input}
         type="password"
         value={form.xBearerToken}
@@ -42,6 +43,7 @@ export function Settings({ settings, onSave }: SettingsProps) {
 
       <label style={styles.label}>Anthropic API Key</label>
       <input
+        className="form-control"
         style={styles.input}
         type="password"
         value={form.anthropicApiKey}
@@ -55,6 +57,7 @@ export function Settings({ settings, onSave }: SettingsProps) {
         <div>
           <label style={styles.label}>取得時刻（時）</label>
           <input
+            className="form-control"
             style={{ ...styles.input, width: '80px' }}
             type="number"
             min={0}
@@ -66,6 +69,7 @@ export function Settings({ settings, onSave }: SettingsProps) {
         <div>
           <label style={styles.label}>（分）</label>
           <input
+            className="form-control"
             style={{ ...styles.input, width: '80px' }}
             type="number"
             min={0}
@@ -80,6 +84,7 @@ export function Settings({ settings, onSave }: SettingsProps) {
 
       <label style={styles.label}>取得件数上限</label>
       <input
+        className="form-control"
         style={{ ...styles.input, width: '100px' }}
         type="number"
         min={10}
@@ -90,6 +95,7 @@ export function Settings({ settings, onSave }: SettingsProps) {
 
       <label style={styles.label}>言語フィルタ</label>
       <select
+        className="form-control"
         style={styles.input}
         value={form.language}
         onChange={(e) => update('language', e.target.value)}
@@ -101,6 +107,7 @@ export function Settings({ settings, onSave }: SettingsProps) {
 
       <label style={styles.label}>検索クエリ（1行に1つ）</label>
       <textarea
+        className="form-control"
         style={{ ...styles.input, height: '120px', resize: 'vertical' }}
         value={form.searchQueries.join('\n')}
         onChange={(e) => update('searchQueries', e.target.value.split('\n').filter(Boolean))}
@@ -135,7 +142,6 @@ const styles: Record<string, CSSProperties> = {
     width: '100%',
     padding: '8px 12px',
     background: 'var(--bg-card)',
-    border: '1px solid var(--border)',
     borderRadius: '6px',
     color: 'var(--text-primary)',
     fontSize: '14px',

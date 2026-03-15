@@ -4,6 +4,11 @@ import electron from 'vite-plugin-electron'
 import renderer from 'vite-plugin-electron-renderer'
 
 export default defineConfig({
+  server: {
+    host: '127.0.0.1',
+    port: 5173,
+    strictPort: true,
+  },
   plugins: [
     react(),
     electron([
@@ -13,7 +18,7 @@ export default defineConfig({
           build: {
             outDir: 'dist-electron',
             rollupOptions: {
-              external: ['electron', 'electron-store', 'node-cron', '@anthropic-ai/sdk'],
+              external: ['electron', 'node-cron'],
             },
           },
         },

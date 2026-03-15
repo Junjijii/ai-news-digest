@@ -33,8 +33,34 @@ body {
   user-select: none;
 }
 
-button, input, select, a {
+button, input, select, textarea, a {
   -webkit-app-region: no-drag;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.news-card {
+  border: 1px solid var(--border);
+  transition: border-color 0.15s ease, transform 0.15s ease;
+}
+
+.news-card:hover {
+  border-color: var(--accent);
+  transform: translateY(-1px);
+}
+
+.form-control {
+  border: 1px solid var(--border);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.form-control:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.18);
 }
 
 ::-webkit-scrollbar {

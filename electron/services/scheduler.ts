@@ -1,7 +1,7 @@
-import cron from 'node-cron'
+import cron, { type ScheduledTask } from 'node-cron'
 
 export class Scheduler {
-  private task: cron.ScheduledTask | null = null
+  private task: ScheduledTask | null = null
   private hour: number
   private minute: number
   private callback: () => void

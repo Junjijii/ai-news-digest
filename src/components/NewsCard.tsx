@@ -20,7 +20,7 @@ export function NewsCard({ item, categoryColor }: NewsCardProps) {
   }
 
   return (
-    <div style={styles.card} onClick={openUrl}>
+    <div className="news-card" style={styles.card} onClick={openUrl}>
       <div style={styles.header}>
         <span style={{ ...styles.category, background: categoryColor + '22', color: categoryColor }}>
           {item.category}
@@ -44,9 +44,7 @@ const styles: Record<string, CSSProperties> = {
     padding: '14px 16px',
     background: 'var(--bg-card)',
     borderRadius: '8px',
-    border: '1px solid var(--border)',
     cursor: 'pointer',
-    transition: 'border-color 0.15s',
   },
   header: {
     display: 'flex',
