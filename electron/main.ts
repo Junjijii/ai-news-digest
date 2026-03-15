@@ -1,6 +1,6 @@
 import { app, BrowserWindow, ipcMain, Tray, Menu, nativeImage } from 'electron'
 import path from 'path'
-import { XApiService } from './services/x-api'
+import { NewsFetcher } from './services/news-fetcher'
 import { Summarizer } from './services/summarizer'
 import { Scheduler } from './services/scheduler'
 import { SettingsStore } from './services/settings-store'
@@ -59,19 +59,19 @@ function createTray() {
 
 async function fetchNews() {
   const settings = settingsStore.getAll()
-  if (!settings.xBearerToken || !settings.anthropicApiKey) {
-    mainWindow?.webContents.send('fetch-error', 'APIキーが設定されていません。設定画面からキーを入力してください。')
+  if (!settings.anthropicApiKey) {
+    mainWindow?.webContents.send('fetch-error', 'APIキーが設定されていません。設定画面からAnthropic API Keyを入力してください。')
     return
   }
 
   mainWindow?.webContents.send('fetch-start')
 
   try {
-    const xApi = new XApiService(settings.xBearerToken)
+    const fetcher = new NewsFetcher()
     const summarizer = new Summarizer(settings.anthropicApiKey)
 
-    const tweets = await xApi.searchAINews(settings.searchQueries, settings.maxResults, settings.language)
-    const feed = await summarizer.summarizeFeed(tweets)
+    const articles = await fetcher.fetchAINews(settings.maxResults)
+    const feed = await summarizer.summarizeFeed(articles)
 
     settingsStore.saveLatestFeed(feed)
     mainWindow?.webContents.send('fetch-complete', feed)

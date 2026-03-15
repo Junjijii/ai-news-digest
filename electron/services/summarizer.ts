@@ -1,5 +1,5 @@
 import Anthropic from '@anthropic-ai/sdk'
-import type { FetchedTweet } from './x-api'
+import type { FetchedArticle } from './news-fetcher'
 import type { NewsFeed, NewsItem } from '../../src/types/news'
 
 export class Summarizer {
@@ -9,8 +9,8 @@ export class Summarizer {
     this.client = new Anthropic({ apiKey })
   }
 
-  async summarizeFeed(tweets: FetchedTweet[]): Promise<NewsFeed> {
-    if (tweets.length === 0) {
+  async summarizeFeed(articles: FetchedArticle[]): Promise<NewsFeed> {
+    if (articles.length === 0) {
       return {
         date: new Date().toISOString().split('T')[0],
         fetchedAt: new Date().toISOString(),
@@ -19,8 +19,8 @@ export class Summarizer {
       }
     }
 
-    const tweetTexts = tweets.map((t, i) =>
-      `[${i + 1}] @${t.authorHandle}: ${t.text} (likes: ${t.likes}, RT: ${t.retweets})`
+    const articleTexts = articles.map((a, i) =>
+      `[${i + 1}] ${a.source}: ${a.title}\n${a.description}`
     ).join('\n\n')
 
     const response = await this.client.messages.create({
@@ -28,17 +28,17 @@ export class Summarizer {
       max_tokens: 4096,
       messages: [{
         role: 'user',
-        content: `以下はX(Twitter)から収集した最新のAI関連ツイートです。これらを分析して、以下のJSON形式で出力してください。
+        content: `以下は世界のテックメディアから収集した最新のAI関連ニュースです。これらを分析して、以下のJSON形式で出力してください。
 
 要件:
 1. 重複するニュースはまとめる
 2. 各ニュースに日本語の要約をつける
 3. カテゴリ分け（LLM, 画像生成, ロボティクス, 規制・政策, ビジネス, 研究, その他）
 4. 全体のサマリーを日本語で作成
-5. 重要度順にソート（エンゲージメント数と内容の重要性を考慮）
+5. 重要度順にソート
 
-ツイート一覧:
-${tweetTexts}
+ニュース一覧:
+${articleTexts}
 
 以下のJSON形式で出力（JSONのみ、他のテキストなし）:
 {
@@ -63,18 +63,18 @@ ${tweetTexts}
     const parsed = JSON.parse(jsonMatch[0])
 
     const items: NewsItem[] = parsed.items.map((item: any) => {
-      const tweet = tweets[item.index - 1]
-      if (!tweet) return null
+      const article = articles[item.index - 1]
+      if (!article) return null
       return {
-        id: tweet.id,
-        author: tweet.authorName,
-        authorHandle: tweet.authorHandle,
-        text: tweet.text,
+        id: article.id,
+        author: article.source,
+        authorHandle: article.source,
+        text: article.description,
         summary: item.summary,
-        url: tweet.url,
-        postedAt: tweet.postedAt,
-        likes: tweet.likes,
-        retweets: tweet.retweets,
+        url: article.url,
+        postedAt: article.postedAt,
+        likes: 0,
+        retweets: 0,
         category: item.category,
       }
     }).filter(Boolean)

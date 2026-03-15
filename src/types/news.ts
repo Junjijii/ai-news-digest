@@ -19,11 +19,8 @@ export interface NewsFeed {
 }
 
 export interface AppSettings {
-  xBearerToken: string
   anthropicApiKey: string
   scheduleHour: number
   scheduleMinute: number
-  searchQueries: string[]
   maxResults: number
-  language: 'ja' | 'en' | 'all'
 }

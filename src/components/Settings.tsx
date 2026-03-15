@@ -9,13 +9,10 @@ interface SettingsProps {
 
 export function Settings({ settings, onSave }: SettingsProps) {
   const [form, setForm] = useState<AppSettings>({
-    xBearerToken: '',
     anthropicApiKey: '',
     scheduleHour: 6,
     scheduleMinute: 0,
-    searchQueries: [],
-    maxResults: 50,
-    language: 'all',
+    maxResults: 30,
   })
 
   useEffect(() => {
@@ -30,17 +27,6 @@ export function Settings({ settings, onSave }: SettingsProps) {
     <div style={styles.container}>
       <h2 style={styles.heading}>API設定</h2>
 
-      <label style={styles.label}>X (Twitter) Bearer Token</label>
-      <input
-        className="form-control"
-        style={styles.input}
-        type="password"
-        value={form.xBearerToken}
-        onChange={(e) => update('xBearerToken', e.target.value)}
-        placeholder="xxxxxxxxxxxxxxxxxxxxxxxxxxx"
-      />
-      <p style={styles.hint}>developer.x.com でプロジェクトを作成し Bearer Token を取得してください</p>
-
       <label style={styles.label}>Anthropic API Key</label>
       <input
         className="form-control"
@@ -50,6 +36,7 @@ export function Settings({ settings, onSave }: SettingsProps) {
         onChange={(e) => update('anthropicApiKey', e.target.value)}
         placeholder="sk-ant-..."
       />
+      <p style={styles.hint}>console.anthropic.com → API Keys → Create Key で取得</p>
 
       <h2 style={{ ...styles.heading, marginTop: '24px' }}>スケジュール設定</h2>
 
@@ -80,38 +67,20 @@ export function Settings({ settings, onSave }: SettingsProps) {
         </div>
       </div>
 
-      <h2 style={{ ...styles.heading, marginTop: '24px' }}>検索設定</h2>
+      <h2 style={{ ...styles.heading, marginTop: '24px' }}>取得設定</h2>
 
       <label style={styles.label}>取得件数上限</label>
       <input
         className="form-control"
         style={{ ...styles.input, width: '100px' }}
         type="number"
-        min={10}
-        max={200}
+        min={5}
+        max={100}
         value={form.maxResults}
-        onChange={(e) => update('maxResults', parseInt(e.target.value) || 50)}
+        onChange={(e) => update('maxResults', parseInt(e.target.value) || 30)}
       />
 
-      <label style={styles.label}>言語フィルタ</label>
-      <select
-        className="form-control"
-        style={styles.input}
-        value={form.language}
-        onChange={(e) => update('language', e.target.value)}
-      >
-        <option value="all">すべて</option>
-        <option value="ja">日本語のみ</option>
-        <option value="en">英語のみ</option>
-      </select>
-
-      <label style={styles.label}>検索クエリ（1行に1つ）</label>
-      <textarea
-        className="form-control"
-        style={{ ...styles.input, height: '120px', resize: 'vertical' }}
-        value={form.searchQueries.join('\n')}
-        onChange={(e) => update('searchQueries', e.target.value.split('\n').filter(Boolean))}
-      />
+      <p style={styles.hint}>MIT Tech Review, VentureBeat, The Verge, Ars Technica, TechCrunch のAIニュースを自動収集します</p>
 
       <button style={styles.saveBtn} onClick={() => onSave(form)}>
         保存

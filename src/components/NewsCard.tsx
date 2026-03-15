@@ -29,11 +29,7 @@ export function NewsCard({ item, categoryColor }: NewsCardProps) {
       </div>
       <p style={styles.summary}>{item.summary}</p>
       <div style={styles.footer}>
-        <span style={styles.author}>@{item.authorHandle}</span>
-        <div style={styles.metrics}>
-          <span style={styles.metric}>&#x2764; {item.likes}</span>
-          <span style={styles.metric}>&#x1F504; {item.retweets}</span>
-        </div>
+        <span style={styles.author}>{item.author}</span>
       </div>
     </div>
   )
