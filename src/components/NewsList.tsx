@@ -8,16 +8,6 @@ interface NewsListProps {
   error: string | null
 }
 
-const CATEGORY_COLORS: Record<string, string> = {
-  'LLM': 'var(--category-llm)',
-  '画像生成': 'var(--category-image)',
-  'ロボティクス': 'var(--category-robotics)',
-  '規制・政策': 'var(--category-policy)',
-  'ビジネス': 'var(--category-business)',
-  '研究': 'var(--category-research)',
-  'その他': 'var(--category-other)',
-}
-
 export function NewsList({ feed, loading, error }: NewsListProps) {
   if (loading) {
     return (
@@ -56,7 +46,6 @@ export function NewsList({ feed, loading, error }: NewsListProps) {
           <NewsCard
             key={item.id}
             item={item}
-            categoryColor={CATEGORY_COLORS[item.category] || 'var(--category-other)'}
           />
         ))}
       </div>
