@@ -17,3 +17,4 @@ files:
   - node_modules/@anthropic-ai/**/*
   - node_modules/electron-store/**/*
   - node_modules/node-cron/**/*
+  - node_modules/uuid/**/*
