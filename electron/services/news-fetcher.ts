@@ -43,13 +43,17 @@ export class NewsFetcher {
 
     deduped.sort((a, b) => new Date(b.postedAt).getTime() - new Date(a.postedAt).getTime())
 
+    // 24時間以内の記事のみ
+    const oneDayAgo = Date.now() - 24 * 60 * 60 * 1000
+    const recent = deduped.filter((a) => new Date(a.postedAt).getTime() > oneDayAgo)
+
     // Filter to AI-related articles
     const aiKeywords = /\b(ai|artificial intelligence|llm|gpt|claude|gemini|openai|anthropic|machine learning|deep learning|neural|transformer|chatbot|generative|diffusion|robot|agi)\b/i
-    const filtered = deduped.filter((a) =>
+    const filtered = recent.filter((a) =>
       aiKeywords.test(a.title) || aiKeywords.test(a.description)
     )
 
-    return (filtered.length > 0 ? filtered : deduped).slice(0, maxResults)
+    return (filtered.length > 0 ? filtered : recent).slice(0, maxResults)
   }
 
   private fetchRSS(feedUrl: string, sourceName: string): Promise<FetchedArticle[]> {
