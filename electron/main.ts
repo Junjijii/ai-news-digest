@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, Tray, Menu, nativeImage } from 'electron'
+import { app, BrowserWindow, ipcMain, Tray, Menu, nativeImage, shell } from 'electron'
 import path from 'path'
 import { NewsFetcher } from './services/news-fetcher'
 import { Summarizer } from './services/summarizer'
@@ -81,6 +81,7 @@ async function fetchNews() {
 }
 
 // IPC handlers
+ipcMain.handle('open-external', (_event, url: string) => shell.openExternal(url))
 ipcMain.handle('get-settings', () => settingsStore.getAll())
 ipcMain.handle('save-settings', (_event, settings) => {
   settingsStore.saveSettings(settings)

@@ -1,6 +1,7 @@
 import { contextBridge, ipcRenderer } from 'electron'
 
 contextBridge.exposeInMainWorld('electronAPI', {
+  openExternal: (url: string) => ipcRenderer.invoke('open-external', url),
   getSettings: () => ipcRenderer.invoke('get-settings'),
   saveSettings: (settings: any) => ipcRenderer.invoke('save-settings', settings),
   getLatestFeed: () => ipcRenderer.invoke('get-latest-feed'),

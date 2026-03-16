@@ -7,7 +7,7 @@ interface NewsCardProps {
 
 export function NewsCard({ item }: NewsCardProps) {
   const openUrl = () => {
-    window.open(item.url, '_blank')
+    window.electronAPI.openExternal(item.url)
   }
 
   const timeAgo = (iso: string) => {
