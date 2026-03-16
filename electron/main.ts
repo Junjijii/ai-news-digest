@@ -33,11 +33,8 @@ function createWindow() {
     mainWindow.loadFile(path.join(__dirname, '../dist/index.html'))
   }
 
-  mainWindow.on('close', (e) => {
-    if (tray) {
-      e.preventDefault()
-      mainWindow?.hide()
-    }
+  mainWindow.on('closed', () => {
+    mainWindow = null
   })
 }
 
@@ -51,7 +48,7 @@ function createTray() {
     { label: 'ウィンドウを表示', click: () => mainWindow?.show() },
     { label: '今すぐ取得', click: () => fetchNews() },
     { type: 'separator' },
-    { label: '終了', click: () => { tray = null; app.quit() } },
+    { label: '終了', click: () => { if (tray) { tray.destroy(); tray = null; } app.quit() } },
   ])
   tray.setContextMenu(contextMenu)
   tray.on('click', () => mainWindow?.show())
@@ -98,14 +95,37 @@ function setupScheduler() {
   scheduler.start()
 }
 
-app.whenReady().then(() => {
-  createWindow()
-  createTray()
-  setupScheduler()
-})
+const gotTheLock = app.requestSingleInstanceLock()
+
+if (!gotTheLock) {
+  app.quit()
+} else {
+  app.on('second-instance', () => {
+    if (mainWindow) {
+      if (mainWindow.isMinimized()) mainWindow.restore()
+      mainWindow.show()
+      mainWindow.focus()
+    }
+  })
+
+  app.on('before-quit', () => {
+    if (scheduler) scheduler.stop()
+    if (tray) { tray.destroy(); tray = null }
+  })
+
+  app.whenReady().then(() => {
+    createWindow()
+    createTray()
+    setupScheduler()
+  })
+}
 
 app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') app.quit()
+  if (tray) {
+    tray.destroy()
+    tray = null
+  }
+  app.quit()
 })
 
 app.on('activate', () => {
