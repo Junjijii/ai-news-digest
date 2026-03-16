@@ -44,7 +44,7 @@ export default function App() {
   }, [])
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
+    <div className="app-shell">
       <Header
         view={view}
         onViewChange={setView}
@@ -52,7 +52,7 @@ export default function App() {
         loading={loading}
         lastFetched={feed?.fetchedAt}
       />
-      <main style={{ flex: 1, overflow: 'auto', padding: '16px 20px' }}>
+      <main className="app-content" style={{ padding: '16px 20px' }}>
         {view === 'feed' ? (
           <NewsList feed={feed} loading={loading} error={error} />
         ) : (

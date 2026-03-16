@@ -15,7 +15,7 @@ export function Header({ view, onViewChange, onFetch, loading, lastFetched }: He
   }
 
   return (
-    <header style={styles.header}>
+    <header className="app-header" style={styles.header}>
       <div style={styles.titleArea}>
         <h1 style={styles.title}>AI News Digest</h1>
         {lastFetched && (

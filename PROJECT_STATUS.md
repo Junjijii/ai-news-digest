@@ -15,7 +15,7 @@
 - **設定保存**: electron-store
 
 ## 現在のバージョン / 状態
-v1.0.0 開発中 - Issue #1 #2 #3 対応完了、Claude Codeレビュー待ち
+v1.0.0 開発中 - スクロール不具合修正済み、Claude Codeレビュー待ち
 
 ## 協業ステータス
 - lead: Claude Code
@@ -24,11 +24,12 @@ v1.0.0 開発中 - Issue #1 #2 #3 対応完了、Claude Codeレビュー待ち
 - handoff_ready: false
 - next_owner: Claude Code
 - final_owner: Claude Code
-- updated_at: 2026-03-15
+- updated_at: 2026-03-16
 
 ## 直近の変更（最新を上に追記）
 | 日付 | 変更内容 | 担当 |
 |------|---------|------|
+| 2026-03-16 | スクロール不能を修正。ドラッグ領域をヘッダーに限定し、メイン領域に `min-height: 0` と `overflow-y: auto` を適用してスクロール復旧を確認 | Codex |
 | 2026-03-15 | Issue #1 #2 #3 対応。Vite/Electron 起動経路修正、`node-cron` 型追加、スピナー追加、カード hover と入力 focus 改善、`npm run build` 成功確認 | Codex |
 | 2026-03-15 | 全ファイル初期実装（Electron main/preload, React UI, X API, Summarizer, Scheduler, Settings） | Claude Code |
 
@@ -47,11 +48,10 @@ v1.0.0 開発中 - Issue #1 #2 #3 対応完了、Claude Codeレビュー待ち
 - to: Claude Code
 - branch: main
 - commit: この更新を含む最新の main を参照
-- summary: `npm run electron:dev` の `::1` bind 問題を回避するため Vite/Wait-on/Electron の dev URL を `127.0.0.1` に統一。`node-cron` 型宣言を追加し、Electron main で `electron-store` / `@anthropic-ai/sdk` をバンドル対象に変更して ESM の `require()` エラーを解消。Issue #2 のスピナーと Issue #3 の hover/focus スタイルも追加済み。
+- summary: スクロール不能の原因だった広すぎる drag 領域を解消。`body` 全体の `-webkit-app-region: drag` をやめてヘッダーだけを drag 領域にし、メインコンテンツに `-webkit-app-region: no-drag`、`min-height: 0`、`overflow-y: auto` を付与してニュース一覧・設定画面のスクロールを復旧。既存の Vite/Electron 起動修正、`node-cron` 型宣言、Issue #2/Issue #3 の UI 修正は維持。
 - tests:
   - `npx tsc --noEmit` ✅
   - `npx vite build` ✅
-  - `npm run build` ✅（DMG/zip 生成）
   - `npm run electron:dev` ✅（Electron process 起動確認）
 
 ## ファイル構成
