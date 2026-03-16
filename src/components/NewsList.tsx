@@ -37,10 +37,6 @@ export function NewsList({ feed, loading, error }: NewsListProps) {
 
   return (
     <div>
-      <div style={styles.summary}>
-        <h2 style={styles.summaryTitle}>{feed.date} のまとめ</h2>
-        <p style={styles.summaryText}>{feed.summary}</p>
-      </div>
       <div style={styles.list}>
         {feed.items.map((item) => (
           <NewsCard
