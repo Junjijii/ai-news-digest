@@ -13,40 +13,25 @@ export interface FetchedArticle {
 // AIインフルエンサー・キーパーソンのXアカウント
 const AI_INFLUENCERS = [
   { handle: 'sama', name: 'Sam Altman' },
-  { handle: 'DarioAmodei', name: 'Dario Amodei' },
+  { handle: 'darioamodei', name: 'Dario Amodei' },
   { handle: 'elonmusk', name: 'Elon Musk' },
-  { handle: 'demaboraoh', name: 'Demis Hassabis' },  // DeepMind
-  { handle: 'kaboraoh', name: 'Andrej Karpathy' },
+  { handle: 'demishassabis', name: 'Demis Hassabis' },
+  { handle: 'karpathy', name: 'Andrej Karpathy' },
   { handle: 'ylecun', name: 'Yann LeCun' },
-  { handle: 'iaboraoh', name: 'Ilya Sutskever' },
   { handle: 'AndrewYNg', name: 'Andrew Ng' },
   { handle: 'OpenAI', name: 'OpenAI' },
   { handle: 'AnthropicAI', name: 'Anthropic' },
   { handle: 'GoogleDeepMind', name: 'Google DeepMind' },
-  { handle: 'xaboraoh', name: 'xAI' },
-  { handle: 'MetaAI', name: 'Meta AI' },
   { handle: 'hardmaru', name: 'hardmaru (David Ha)' },
-  { handle: 'emaboraoh', name: 'Emad Mostaque' },
-  { handle: 'kaboraoh', name: 'Jim Fan (NVIDIA)' },
+  { handle: 'EMostaque', name: 'Emad Mostaque' },
   { handle: 'DrJimFan', name: 'Jim Fan' },
-  { handle: 'bindureddy', name: 'Bindu Reddy' },
   { handle: 'AravSrinivas', name: 'Arav Srinivas (Perplexity)' },
-  { handle: 'svpino', name: 'Santiago (ML)' },
-  // AI研究者
   { handle: 'GaryMarcus', name: 'Gary Marcus' },
-  { handle: 'jeffdean', name: 'Jeff Dean (Google)' },
-  { handle: 'fcaboraoh', name: 'Fei-Fei Li' },
-  { handle: 'goodfellow_ian', name: 'Ian Goodfellow' },
-  { handle: 'huaboraoh', name: 'Hugging Face' },
+  { handle: 'JeffDean', name: 'Jeff Dean (Google)' },
+  { handle: 'huggingface', name: 'Hugging Face' },
   { handle: 'ClementDelangue', name: 'Clement Delangue (HF)' },
   { handle: '_jasonwei', name: 'Jason Wei (OpenAI)' },
   { handle: 'percyliang', name: 'Percy Liang (Stanford)' },
-  // 中国AI
-  { handle: 'deepaboraoh', name: 'DeepSeek' },
-  { handle: 'zhaboraoh', name: 'Zhipu AI' },
-  { handle: 'kaifuaboraoh', name: 'Kai-Fu Lee' },
-  { handle: 'laboraoh', name: 'Alibaba DAMO' },
-  { handle: 'baidu_research', name: 'Baidu Research' },
 ]
 
 // RSSHub公開インスタンス（複数用意してフォールバック）
@@ -66,17 +51,21 @@ const FALLBACK_RSS = [
 export class NewsFetcher {
   async fetchAINews(maxResults: number): Promise<FetchedArticle[]> {
     const allArticles: FetchedArticle[] = []
+    const rssHubInstance = await this.findWorkingRSSHubInstance()
 
-    // Xアカウントからの取得を並列実行
-    const xPromises = AI_INFLUENCERS.map((account) =>
-      this.fetchFromX(account.handle, account.name).catch((err) => {
-        console.error(`[NewsFetcher] X fetch failed: @${account.handle}`, err.message)
-        return [] as FetchedArticle[]
-      })
-    )
-    const xResults = await Promise.all(xPromises)
-    for (const articles of xResults) {
-      allArticles.push(...articles)
+    if (rssHubInstance) {
+      const xPromises = AI_INFLUENCERS.map((account) =>
+        this.fetchFromX(rssHubInstance, account.handle, account.name).catch((err) => {
+          console.error(`[NewsFetcher] X fetch failed: @${account.handle}`, err.message)
+          return [] as FetchedArticle[]
+        })
+      )
+      const xResults = await Promise.all(xPromises)
+      for (const articles of xResults) {
+        allArticles.push(...articles)
+      }
+    } else {
+      console.warn('[NewsFetcher] No public RSSHub instance currently serves the X route, using fallback RSS only')
     }
 
     // Xから十分な記事が取れなかった場合、フォールバックRSSも使う
@@ -109,18 +98,46 @@ export class NewsFetcher {
     return deduped.slice(0, maxResults)
   }
 
-  private async fetchFromX(handle: string, name: string): Promise<FetchedArticle[]> {
-    // RSSHubインスタンスを順に試す
+  private async findWorkingRSSHubInstance(): Promise<string | null> {
     for (const instance of RSSHUB_INSTANCES) {
       try {
-        const url = `${instance}/twitter/user/${handle}`
-        const articles = await this.fetchRSS(url, `@${handle} (${name})`)
-        if (articles.length > 0) return articles
-      } catch {
-        continue
+        const statusCode = await this.probeRSSStatus(`${instance}/twitter/user/sama`)
+        if (statusCode && statusCode >= 200 && statusCode < 300) {
+          return instance
+        }
+        console.warn(`[NewsFetcher] RSSHub probe failed: ${instance} (${statusCode ?? 'no status'})`)
+      } catch (err: any) {
+        console.warn(`[NewsFetcher] RSSHub probe error: ${instance}`, err.message)
       }
     }
-    return []
+
+    return null
+  }
+
+  private async fetchFromX(instance: string, handle: string, name: string): Promise<FetchedArticle[]> {
+    const url = `${instance}/twitter/user/${handle}`
+    return this.fetchRSS(url, `@${handle} (${name})`)
+  }
+
+  private probeRSSStatus(feedUrl: string): Promise<number | undefined> {
+    return new Promise((resolve, reject) => {
+      const client = feedUrl.startsWith('https') ? https : http
+      const req = client.request(feedUrl, {
+        method: 'GET',
+        headers: { 'User-Agent': 'AI-News-Digest/1.0' },
+        timeout: 5000,
+      }, (res) => {
+        res.resume()
+        resolve(res.statusCode)
+      })
+
+      req.on('error', reject)
+      req.on('timeout', () => {
+        req.destroy()
+        reject(new Error('timeout'))
+      })
+      req.end()
+    })
   }
 
   private fetchRSS(feedUrl: string, sourceName: string): Promise<FetchedArticle[]> {

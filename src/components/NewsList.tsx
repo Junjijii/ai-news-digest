@@ -9,6 +9,8 @@ interface NewsListProps {
 }
 
 export function NewsList({ feed, loading, error }: NewsListProps) {
+  const items = Array.isArray(feed?.items) ? feed.items : []
+
   if (loading) {
     return (
       <div style={styles.center}>
@@ -26,11 +28,11 @@ export function NewsList({ feed, loading, error }: NewsListProps) {
     )
   }
 
-  if (!feed || feed.items.length === 0) {
+  if (!feed || items.length === 0) {
     return (
       <div style={styles.center}>
         <p style={styles.emptyText}>ニュースがありません</p>
-        <p style={styles.emptyHint}>「今すぐ取得」ボタンを押すか、設定画面でAPIキーを入力してください</p>
+        <p style={styles.emptyHint}>「今すぐ取得」を押すか、設定画面で API キーを保存してください</p>
       </div>
     )
   }
@@ -38,7 +40,7 @@ export function NewsList({ feed, loading, error }: NewsListProps) {
   return (
     <div>
       <div style={styles.list}>
-        {feed.items.map((item) => (
+        {items.map((item) => (
           <NewsCard
             key={item.id}
             item={item}

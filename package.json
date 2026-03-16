@@ -4,11 +4,12 @@
   "description": "毎朝6時にXの最新AIニュースを収集・要約して表示するデスクトップアプリ",
   "main": "dist-electron/main.js",
   "scripts": {
+    "clean": "rm -rf dist dist-electron release",
     "dev": "vite",
-    "build": "tsc && vite build && electron-builder",
+    "build": "npm run clean && tsc && vite build && electron-builder",
     "preview": "vite preview",
     "electron:dev": "concurrently \"vite\" \"wait-on http://127.0.0.1:5173 && electron .\"",
-    "electron:build": "vite build && electron-builder --mac"
+    "electron:build": "npm run clean && tsc && vite build && electron-builder --mac"
   },
   "keywords": ["ai", "news", "x", "twitter", "electron"],
   "author": "Junjijii",

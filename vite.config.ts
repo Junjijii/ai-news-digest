@@ -9,6 +9,16 @@ export default defineConfig({
     port: 5173,
     strictPort: true,
   },
+  build: {
+    emptyOutDir: true,
+    rollupOptions: {
+      output: {
+        entryFileNames: 'assets/app.js',
+        chunkFileNames: 'assets/[name].js',
+        assetFileNames: 'assets/[name][extname]',
+      },
+    },
+  },
   plugins: [
     react(),
     electron([

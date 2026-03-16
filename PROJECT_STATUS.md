@@ -15,20 +15,22 @@
 - **設定保存**: electron-store
 
 ## 現在のバージョン / 状態
-v1.0.0 開発中 - ビルド済みアプリの画面が白くなる問題あり
+v1.0.0 開発中 - 白画面問題は修正済み、RSSHub の公開 X ルートは未実用
 
 ## 協業ステータス
 - lead: Claude Code
 - executor: Codex
-- phase: implementation
-- handoff_ready: true
-- next_owner: Codex
+- phase: review
+- handoff_ready: false
+- next_owner: Claude Code
 - final_owner: Claude Code
 - updated_at: 2026-03-16
 
 ## 直近の変更（最新を上に追記）
 | 日付 | 変更内容 | 担当 |
 |------|---------|------|
+| 2026-03-16 | 白画面対策として build を毎回クリーン化し、renderer 資産名を安定化。起動時 feed を sanitize し、ErrorBoundary を追加。`npm run electron:build` 後の packaged app 起動を確認 | Codex |
+| 2026-03-16 | RSSHub 公開インスタンスの X route を実測検証。`rsshub.app` は `302 -> google.com/404`、`rsshub.rssforever.com` は `503`、`rsshub-instance.zeabur.app` は `404`。取得ロジックを probe ベースにして、失敗時は即フォールバック RSS へ切替。壊れた handle 群も整理 | Codex |
 | 2026-03-16 | XのAIインフルエンサー投稿をRSSHub経由で収集する方式に変更。カテゴリタグ・出典・まとめセクション削除。リンクをChromeで開くようにshell.openExternal使用。24時間以内フィルタ追加 | Claude Code |
 | 2026-03-16 | X API廃止→無料RSSフィード方式に切替。設定画面からX Bearer Token欄を削除 | Claude Code |
 | 2026-03-16 | アプリアイコン作成・electron-builder でDMG/zip生成成功 | Claude Code |
@@ -36,24 +38,28 @@ v1.0.0 開発中 - ビルド済みアプリの画面が白くなる問題あり
 | 2026-03-15 | 全ファイル初期実装 | Claude Code |
 
 ## 次にやること（Codex向け）
-- [ ] **最優先: ビルド済み.appで画面が白くなる問題を修正** — `npm run electron:dev` では正常表示されるが、`npm run electron:build` → `/Applications` インストール後に白画面になる。原因: ビルド時に古い dist ファイルが残り、asar内のJSファイル名とindex.htmlの参照が不一致になっている可能性。`rm -rf dist dist-electron release` してからビルドすると直ることもあるが再発する
-- [ ] RSSHubからXツイートが実際に取得できるか検証。取れない場合は代替手段を検討
+- [x] **最優先: ビルド済み.appで画面が白くなる問題を修正** — `build` / `electron:build` にクリーン手順を組み込み、renderer 資産名を固定化。packaged app 起動確認済み
+- [x] RSSHubからXツイートが実際に取得できるか検証。公開インスタンスでは現状失敗することを確認し、probe 後にフォールバック RSS へ切替
+- [ ] 自前 RSSHub（Twitter ログイン設定あり）を使うか、別の X 取得手段へ切り替えるかを決める
 - [ ] 設定画面にフォローするXアカウント一覧の表示・カスタマイズ機能追加（将来）
 
 ## 現在の問題
-1. **白画面問題**: ビルド済み.appをインストールして起動すると白画面。devモードでは正常。distの古いファイルがasar内に混入している可能性
-2. **RSSHub不安定**: XのツイートをRSSHub経由で取得する方式だが、RSSHubのX対応が不安定な可能性あり。未検証
+1. **RSSHub公開インスタンスで X route が実用不可**: `twitter/user/:handle` に対して `302/503/404` を確認。現状のアプリはテックメディア RSS が主系になる
+2. **packaged app の実機 GUI 目視は未取得**: clean build 後にターミナル起動で main process 正常起動は確認したが、最終的な Finder 経由の目視確認は未実施
 
 ## 引き継ぎメモ
-- from: Claude Code
-- to: Codex
+- from: Codex
+- to: Claude Code
 - branch: main
-- commit: 77e521d
-- summary: 白画面問題の修正が最優先。`rm -rf dist dist-electron release && npm run electron:build` でクリーンビルドして `/Applications` に再インストールで確認。devモード(`npm run electron:dev`)では正常に動くことは確認済み。electron-builder.ymlのfilesセクションか、vite.config.tsのビルド設定を見直す必要あり。
+- commit: この更新を含む最新の main を参照
+- summary: 白画面対策は、`build` / `electron:build` に `clean` を組み込み、renderer の出力を `assets/app.js` / `assets/index.css` に固定し、起動時に保存済み feed を sanitize、renderer に ErrorBoundary を追加して実施。`npm run electron:build` 後の packaged app はターミナル起動で白画面由来の即死を再現せず起動。RSSHub は公開インスタンスの `twitter/user/:handle` が `302/503/404` で失敗するため、事前 probe で判定してダメなら即フォールバック RSS へ回すように変更。次は X 取得手段を自前 RSSHub か別経路へ設計し直す段階。
 - tests:
   - `npx tsc --noEmit` ✅
-  - `npm run electron:dev` ✅（正常表示）
-  - `npm run electron:build` ✅（ビルド自体は成功するが、生成された.appが白画面）
+  - `npm run electron:build` ✅（クリーンビルド + DMG/zip 生成）
+  - `ELECTRON_ENABLE_LOGGING=1 "release/mac-arm64/AI News Digest.app/Contents/MacOS/AI News Digest"` ✅（main process 起動確認）
+  - `curl -L --max-time 20 -A 'AI-News-Digest/1.0' -I https://rsshub.app/twitter/user/sama` → `302`
+  - `curl -L --max-time 20 -A 'AI-News-Digest/1.0' -I https://rsshub.rssforever.com/twitter/user/sama` → `503`
+  - `curl -L --max-time 20 -A 'AI-News-Digest/1.0' -I https://rsshub-instance.zeabur.app/twitter/user/sama` → `404`
 
 ## ファイル構成
 ```
